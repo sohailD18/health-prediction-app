@@ -132,3 +132,4 @@ MAILERS = {
 }
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
