@@ -13,11 +13,11 @@ class PatientForm(forms.ModelForm):
     # Accept both dd/mm/yyyy and dd.mm.yyyy. Impossible dates (e.g. 31.11.2001)
     # fail automatically and show the "invalid" message below.
     date_of_birth = forms.DateField(
-        input_formats=['%d/%m/%Y', '%d.%m.%Y'],
-        widget=forms.TextInput(attrs={'placeholder': 'dd/mm/yyyy'}),
+        input_formats=['%d.%m.%Y', '%d/%m/%Y'],   # both accepted, dd.mm.yyyy is the main one
+        widget=forms.DateInput(format='%d.%m.%Y', attrs={'placeholder': 'dd.mm.yyyy'}),
         error_messages={
             'required': 'Date of birth is required.',
-            'invalid': 'Enter a real date in dd/mm/yyyy format (for example 28/01/1960).',
+            'invalid': 'Enter a real date in dd.mm.yyyy format (for example 28.01.1960).',
         },
     )
 
@@ -60,6 +60,12 @@ class PatientForm(forms.ModelForm):
         # Bootstrap styling for every input
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
+
+        # Show 232 instead of 232.0 when editing (13.5 stays 13.5)
+        for name in ('glucose', 'haemoglobin', 'cholesterol'):
+            value = self.initial.get(name)
+            if value is not None:
+                self.initial[name] = f'{value:g}'
 
     def clean_full_name(self):
         name = ' '.join(self.cleaned_data['full_name'].split())  # tidy extra spaces

@@ -1,0 +1,44 @@
+{% extends 'patients/base.html' %}
+{% block content %}
+<h4 class="mb-3">Patient records ({{ patients|length }})</h4>
+
+<div class="table-responsive">
+  <table class="table table-bordered table-hover bg-white align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>#</th><th>Full name</th><th>Date of birth</th><th>Email</th>
+        <th>Glucose</th><th>Haemoglobin</th><th>Cholesterol</th>
+        <th>Remarks (AI)</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in patients %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ p.full_name }}</td>
+        <td>{{ p.date_of_birth|date:"d.m.Y" }}</td>
+        <td>{{ p.email }}</td>
+        <td>{{ p.glucose|floatformat:"-1" }}</td>
+        <td>{{ p.haemoglobin|floatformat:"-1" }}</td>
+        <td>{{ p.cholesterol|floatformat:"-1" }}</td>
+        <td style="min-width: 280px;">
+          {{ p.remarks }}
+          {% if p.remarks == unavailable %}
+            <form method="post" action="{% url 'patient_retry' p.pk %}" class="mt-1">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-warning">Retry</button>
+            </form>
+          {% endif %}
+        </td>
+        <td class="text-nowrap">
+          <a class="btn btn-sm btn-primary" href="{% url 'patient_edit' p.pk %}">Edit</a>
+          <a class="btn btn-sm btn-danger" href="{% url 'patient_delete' p.pk %}">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" class="text-center text-muted">No records yet. Click "Add patient".</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

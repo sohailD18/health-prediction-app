@@ -1,0 +1,75 @@
+{% extends 'patients/base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm" style="max-width: 600px;">
+  <div class="card-body">
+    <h4 class="mb-3">{{ title }}</h4>
+
+    {# novalidate turns off browser checks so Django's own error messages show #}
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      {% for field in form %}
+      <div class="mb-3">
+        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+
+        {% if field.name == 'date_of_birth' %}
+          <div class="input-group">
+            {{ field }}
+            <button type="button" id="dob-picker-btn" class="btn btn-outline-secondary"
+                    title="Pick a date">&#128197;</button>
+          </div>
+          {# Hidden helper: flatpickr attaches here, never to the button or the real field #}
+          <input type="text" id="dob-helper" tabindex="-1" aria-hidden="true"
+                 style="position:absolute; opacity:0; width:0; height:0; border:0; padding:0;">
+          <div class="form-text">Type dd.mm.yyyy or use the calendar button.</div>
+        {% else %}
+          {{ field }}
+        {% endif %}
+
+        {% for error in field.errors %}
+          <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="{% url 'patient_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script>
+  const dobInput = document.getElementById('id_date_of_birth');
+  const dobButton = document.getElementById('dob-picker-btn');
+  const typed = dobInput.value.trim();
+
+  // flatpickr is bound to the hidden helper input only. It is positioned under
+  // the real date box, and the real box stays a plain text input.
+  const picker = flatpickr('#dob-helper', {
+    dateFormat: 'd.m.Y',
+    maxDate: 'today',                       // the calendar cannot pick a future date
+    positionElement: dobInput,
+    defaultDate: /^\d{2}\.\d{2}\.\d{4}$/.test(typed) ? typed : null,
+    onChange: function (selectedDates, dateStr) {
+      dobInput.value = dateStr;             // e.g. 28.01.1960
+    },
+  });
+
+  dobButton.addEventListener('click', function (event) {
+    event.preventDefault();                 // never submit the form
+    picker.open();
+  });
+</script>
+{% endblock %}
