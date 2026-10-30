@@ -42,6 +42,9 @@
       {% endfor %}
 
       <button type="submit" class="btn btn-primary">Save</button>
+      {% if not form.instance.pk %}
+        <button type="button" id="clear-btn" class="btn btn-outline-warning">Clear</button>
+      {% endif %}
       <a href="{% url 'patient_list' %}" class="btn btn-secondary">Cancel</a>
     </form>
   </div>
@@ -71,5 +74,21 @@
     event.preventDefault();                 // never submit the form
     picker.open();
   });
+
+  // Clear button (Add page only): empties every field and removes error messages
+  const clearButton = document.getElementById('clear-btn');
+  if (clearButton) {
+    clearButton.addEventListener('click', function () {
+      document.querySelectorAll('form input.form-control').forEach(function (input) {
+        input.value = '';
+      });
+      picker.clear();                                   // reset the calendar too
+      document.querySelectorAll('.text-danger.small, .alert').forEach(function (el) {
+        el.remove();                                    // field errors and banners
+      });
+      dobInput.focus();                                 // see note below
+      document.querySelector('form input.form-control').focus();
+    });
+  }
 </script>
 {% endblock %}

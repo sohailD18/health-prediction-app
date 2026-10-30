@@ -5,15 +5,23 @@ from django import forms
 
 from .models import Patient
 
-# Letters, spaces, hyphens and apostrophes only (allows "Madison XI", "O'Brien")
+# Letters, spaces, hyphens and apostrophes only, starting with a letter.
 NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z\s'\-]*$")
+
+# A word made only of uppercase Roman numeral letters in a valid order (XI, III, IV...).
+ROMAN_PATTERN = re.compile(r'^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$')
+
+# Exactly dd.mm.yyyy or dd/mm/yyyy (two-digit day and month, four-digit year).
+DATE_PATTERN = re.compile(r'^\d{2}[./]\d{2}[./]\d{4}$')
+
+MAX_AGE_YEARS = 120
 
 
 class PatientForm(forms.ModelForm):
-    # Accept both dd/mm/yyyy and dd.mm.yyyy. Impossible dates (e.g. 31.11.2001)
-    # fail automatically and show the "invalid" message below.
+    # Accept both dd.mm.yyyy and dd/mm/yyyy. Impossible dates (e.g. 31.11.2001)
+    # fail here automatically and show the "invalid" message below.
     date_of_birth = forms.DateField(
-        input_formats=['%d.%m.%Y', '%d/%m/%Y'],   # both accepted, dd.mm.yyyy is the main one
+        input_formats=['%d.%m.%Y', '%d/%m/%Y'],
         widget=forms.DateInput(format='%d.%m.%Y', attrs={'placeholder': 'dd.mm.yyyy'}),
         error_messages={
             'required': 'Date of birth is required.',
@@ -74,13 +82,26 @@ class PatientForm(forms.ModelForm):
         if not NAME_PATTERN.match(name):
             raise forms.ValidationError(
                 'Name may contain only letters, spaces, hyphens and apostrophes.')
+        # Reject Roman numerals such as XI or III (uppercase words of 2+ letters)
+        for word in name.split():
+            if len(word) >= 2 and ROMAN_PATTERN.match(word):
+                raise forms.ValidationError(
+                    f'Name cannot contain Roman numerals (found "{word}").')
         return name
 
     def clean_date_of_birth(self):
+        # Runs only if the date was already parsed as a real date.
+        raw = self.data.get('date_of_birth', '').strip()
+        if not DATE_PATTERN.match(raw):
+            raise forms.ValidationError(
+                'Use the format dd.mm.yyyy (for example 28.01.1960).')
         dob = self.cleaned_data['date_of_birth']
         if dob > date.today():
             raise forms.ValidationError('Date of birth cannot be in the future.')
-        return dob
+        if dob.year < date.today().year - MAX_AGE_YEARS:
+            raise forms.ValidationError(
+                f'Date of birth cannot be more than {MAX_AGE_YEARS} years ago.')
+        return dob   # a clean_ method must always return the value
 
     def clean_email(self):
         email = self.cleaned_data['email'].strip().lower()
