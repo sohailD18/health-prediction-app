@@ -1,0 +1,101 @@
+/* ===== Colours (change these to retheme the whole app) ===== */
+:root {
+  --brand: #0f766e;
+  --brand-dark: #115e59;
+  --page-bg: #f4f7f9;
+  --text: #1f2937;
+  --border: #dde3e8;
+}
+
+/* ===== Page ===== */
+body {
+  background: var(--page-bg) !important;
+  color: var(--text);
+  font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+  background: var(--brand) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.navbar .btn-success {
+  background: #fff;
+  color: var(--brand);
+  border: 0;
+  font-weight: 600;
+}
+.navbar .btn-success:hover {
+  background: #e6f4f2;
+  color: var(--brand-dark);
+}
+
+/* ===== Cards and forms ===== */
+.card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.form-label {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+.form-control {
+  border-radius: 8px;
+  border-color: var(--border);
+}
+.form-control:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.15);
+}
+
+/* ===== Buttons ===== */
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+}
+.btn-primary {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+}
+
+/* ===== Alerts ===== */
+.alert {
+  border-radius: 10px;
+  border: 0;
+}
+
+/* ===== Table ===== */
+.table-responsive {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+.table {
+  margin-bottom: 0;
+  font-size: 0.92rem;
+}
+.table-dark {
+  --bs-table-bg: var(--brand-dark);
+  --bs-table-border-color: var(--brand-dark);
+}
+.table thead th {
+  white-space: nowrap;
+  font-weight: 600;
+}
+.table tbody td {
+  vertical-align: top;
+}
+/* Remarks column: easier to read long AI text */
+.table tbody td:nth-child(8) {
+  line-height: 1.45;
+}
